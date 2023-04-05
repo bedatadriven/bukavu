@@ -1,0 +1,18 @@
+
+description = 'ActivityInfo Virtual DOM'
+
+
+dependencies {
+    compile libraries.gwt.user
+    compile libraries.elemental.core
+    compile libraries.elemental.dom
+    compile libraries.guava
+    compileOnly 'org.checkerframework:checker-qual:3.28.0'
+    testCompile libraries.junit
+    testCompile libraries.hamcrest
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+}

@@ -1,0 +1,13 @@
+
+apply plugin: 'java'
+
+
+dependencies {
+    compile project(":core")
+    compileOnly libraries.gwt.user
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+}

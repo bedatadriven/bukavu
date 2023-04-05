@@ -1,0 +1,121 @@
+
+// buildscript:
+// Declare the dependencies of the gradle build scripts
+// themselves.
+
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath  "com.github.node-gradle:gradle-node-plugin:3.1.1"
+        classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
+        classpath "gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.15.0"
+        classpath "org.checkerframework:checkerframework-gradle-plugin:0.6.20"
+        classpath 'org.docstr:gwt-gradle-plugin:1.1.21'
+
+    }
+}
+
+
+
+// Define common versions of dependencies to use throughout the project, and
+// define conflict resolution rules.
+
+ext {
+    guavaVersion = '30.1-jre'
+    gwtVersion = '2.10.0'
+
+    libraries = [
+        guava:              "com.google.guava:guava:${guavaVersion}",
+        gson:               "com.google.code.gson:gson:2.9.0",
+        gwt:[
+            user:           "com.google.gwt:gwt-user:${gwtVersion}",
+            servlet:        "com.google.gwt:gwt-servlet:${gwtVersion}",
+            dev:            "com.google.gwt:gwt-dev:${gwtVersion}",
+            i18nServer:     'net.lightoze.gwt-i18n-server:gwt-i18n-server:0.26',
+            guava:          "com.google.guava:guava-gwt:${guavaVersion}",
+            jsinterop:      'com.google.jsinterop:jsinterop-annotations:2.0.0'
+        ],
+
+        elemental: [
+            core:           'com.google.elemental2:elemental2-core:1.1.0',
+            dom:            'com.google.elemental2:elemental2-dom:1.1.0',
+            promise:        'com.google.elemental2:elemental2-promise:1.1.0',
+            indexeddb:      'com.google.elemental2:elemental2-indexeddb:1.1.0'
+        ],
+        junit:              'org.junit.jupiter:junit-jupiter:5.8.2',
+        hamcrest:           'org.hamcrest:hamcrest-library:2.2'
+    ]
+}
+
+
+allprojects {
+    version "0.1"
+    repositories {
+        mavenCentral()
+    }
+}
+
+allprojects {
+    apply plugin: 'com.github.hierynomus.license'
+
+    license {
+        header rootProject.file('COPYRIGHT')
+        strictCheck true
+        mapping {
+            java = 'SLASHSTAR_STYLE'
+            scss = 'SLASHSTAR_STYLE'
+        }
+        exclude "**/*.json"
+        exclude "**/*.txt"
+        exclude "**/*.md"
+        exclude "**/*.svg"
+        exclude "**/*.gif"
+        exclude "**/*.png"
+        exclude "**/*.jpeg"
+        exclude "**/*.svg.template"
+        exclude "**/*.xlsx"
+        exclude "**/*.xls"
+        exclude "**/*.bin"
+        exclude "**/*.csv"
+        exclude "**/*.webmanifest"
+    }
+}
+
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId 'org.activityinfo.bukavu'
+                artifactId "bukavu-${project.name}"
+
+                from components.java
+
+                pom {
+                    url = 'https://github.com/bedatadriven/bukavu'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = "Repsy"
+                url = uri("https://repo.repsy.io/mvn/bedatadriven/activityinfo")
+                credentials {
+                    username = project.findProperty("repsy.user") ?: System.getenv("USERNAME")
+                    password = project.findProperty("repsy.key") ?: System.getenv("TOKEN")
+                }
+            }
+        }
+    }
+}

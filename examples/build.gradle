@@ -1,0 +1,62 @@
+apply plugin: 'java'
+
+configurations {
+    gwt
+    gwtSdk
+}
+
+
+dependencies {
+    compile project(":core")
+    compile project(":bootstrap")
+    compileOnly libraries.gwt.user
+
+    // Sources required for compilation
+    gwt libraries.gwt.user
+    gwt libraries.gwt.guava
+    gwt libraries.guava
+    gwt libraries.elemental.core
+    gwt libraries.elemental.dom
+
+    // Toolkit that includes Java->JavaScript compiler
+    gwtSdk libraries.gwt.dev
+}
+
+task prepWarDir(type: Copy) {
+    from "src/main/webapp"
+    into "$buildDir/war"
+}
+
+task run(type: JavaExec) {
+    group 'develop'
+    dependsOn prepWarDir
+    dependsOn compileJava
+    main = 'com.google.gwt.dev.DevMode'
+
+    // Add the GWT SDK to the classpath first
+    classpath configurations.gwtSdk
+
+    // Add sources from our libraries to the classpath
+    classpath sourceSets.main.java.srcDirs
+    classpath project(":core").sourceSets.main.java.srcDirs
+    classpath project(':core').file("src/super/java")
+    classpath project(":bootstrap").sourceSets.main.java.srcDirs
+    classpath configurations.runtime
+
+    // GWT sources
+    classpath configurations.gwt
+
+    args '-startServer'
+    args '-logLevel', 'WARN'
+    args '-war', "${buildDir}/war"
+    args '-startupUrl', 'index.html'
+    args '-port', "9000"
+    args '-generateJsInteropExports'
+    args 'org.activityinfo.examples.Examples'
+
+    doFirst {
+        for(File classpathEntry : classpath) {
+            logger.lifecycle("Classpath: " + classpathEntry)
+        }
+    }
+}
